@@ -55,24 +55,56 @@ fs.readdir('06-build-page/', (err, files) => {
 });
 
 fs.readdir('06-build-page/components/', (err, files) => {
-  let articles=fs.createReadStream('06-build-page/components/'+ files[0], 'utf-8');
-  let footer=fs.createReadStream('06-build-page/components/'+ files[1], 'utf-8');
-  let header=fs.createReadStream('06-build-page/components/'+ files[2], 'utf-8');
+  console.log(files)
+    if(files.length===3){
+      let articles=fs.createReadStream('06-build-page/components/'+ files[0], 'utf-8');
+      let footer=fs.createReadStream('06-build-page/components/'+ files[1], 'utf-8');
+      let header=fs.createReadStream('06-build-page/components/'+ files[2], 'utf-8');
+      
+      header.on('data',function(header){
+        
+        articles.on('data',function(articles){
+        
+          footer.on('data',function(footer){
+        
+            fs.readFile('06-build-page/project-dist/index.html', 'utf8', function(error, data){
+              data = data.toString().replace('{{header}}', header).replace('{{footer}}', footer).replace('{{articles}}', articles);
+              fs.writeFile('06-build-page/project-dist/index.html',data,(err=>{
+                if(err){
+                  console.log(err);
+                }
+              }));
+            });
+          });
+        });
+      });
+    }else if(files.length===4){
+      let about=fs.createReadStream('06-build-page/components/'+ files[0], 'utf-8');
+      let articles=fs.createReadStream('06-build-page/components/'+ files[1], 'utf-8');
+      let footer=fs.createReadStream('06-build-page/components/'+ files[2], 'utf-8');
+      let header=fs.createReadStream('06-build-page/components/'+ files[3], 'utf-8');
   header.on('data',function(header){
     
     articles.on('data',function(articles){
     
       footer.on('data',function(footer){
+
+          about.on('data',function(about){
     
         fs.readFile('06-build-page/project-dist/index.html', 'utf8', function(error, data){
-          data = data.toString().replace('{{header}}', header).replace('{{footer}}', footer).replace('{{articles}}', articles);
+          data = data.toString().replace('{{header}}', header).replace('{{footer}}', footer).replace('{{articles}}', articles).replace('{{about}}', about);
           fs.writeFile('06-build-page/project-dist/index.html',data,(err=>{
             if(err){
               console.log(err);
             }
           }));
         });
+      })
       });
     });
   });
+}
 });
+
+  
+
